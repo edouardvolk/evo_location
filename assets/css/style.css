@@ -86,7 +86,7 @@ h3{ font-size:clamp(1.4rem, 2.4vw, 2rem); }
 
 /* ---------- Hero ---------- */
 .hero{
-  position:relative; min-height:100svh; display:flex; align-items:flex-end;
+  position:relative; min-height:100vh; min-height:100svh; display:flex; align-items:flex-end;
   overflow:hidden; color:#fff;
 }
 .hero__media{ position:absolute; inset:0; z-index:-2; }
@@ -240,3 +240,31 @@ section{ position:relative; }
 /* small helpers */
 .center{ text-align:center; }
 .mt-s{ margin-top:1rem; } .mt-m{ margin-top:2rem; }
+
+/* ---------- Mobile refinements ---------- */
+@media(max-width:900px){
+  /* Parallax is off on mobile, so let images fill their frame exactly
+     (avoids any empty strip at the bottom of hero / banner images) */
+  .hero__media img,
+  .banner img,
+  .prop-hero img{ height:100%; }
+}
+@media(max-width:560px){
+  .hero__inner{ padding-block:0 7vh; }
+  .hero__loc{ font-size:.9rem; letter-spacing:.14em; }
+  .section{ padding-block:clamp(3.4rem,9vh,6rem); }
+  .topbar{ padding:1.1rem 1.2rem; }
+
+  /* contact cards: stack full width, never overflow small screens */
+  .contact-cards{ flex-direction:column; align-items:stretch; gap:1rem; }
+  .ccard{ min-width:0; width:100%; padding:1.9rem 1.4rem; }
+  .ccard a{ font-size:1.3rem; word-break:break-word; }
+
+  /* roomier lightbox controls for touch */
+  .lightbox img{ max-width:94vw; max-height:80vh; }
+  .lightbox .lb-close{ top:1rem; right:1.1rem; font-size:2.4rem; }
+  .lightbox .lb-nav{ font-size:2rem; padding:1.2rem .6rem; }
+
+  .gallery-head{ margin-bottom:2rem; }
+  .banner{ height:56vh; }
+}

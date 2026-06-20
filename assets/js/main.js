@@ -45,10 +45,15 @@
       ticking = true;
     }
   }
-  if (parallaxEls.length && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  const canParallax =
+    window.matchMedia("(min-width: 900px)").matches &&
+    !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (parallaxEls.length && canParallax) {
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", parallax);
     parallax();
+  } else {
+    parallaxEls.forEach((el) => { el.style.transform = "none"; });
   }
 
   /* ---------- Lightbox ---------- */
