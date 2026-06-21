@@ -15,7 +15,13 @@
   .landing-hero .split{ position:absolute; inset:0; display:grid; grid-template-columns:1fr 1fr; z-index:-2; }
   .landing-hero .split img{ width:100%; height:100%; object-fit:cover; }
   .landing-hero::after{ content:""; position:absolute; inset:0; background:rgba(20,18,15,.5); z-index:-1; }
-  @media(max-width:760px){ .landing-hero .split{ grid-template-columns:1fr; grid-template-rows:1fr 1fr; } }
+  /* On phones, two landscape photos squeezed into two half-screens crop badly.
+     Show a single, portrait-friendly image full screen instead. */
+  @media(max-width:760px){
+    .landing-hero .split{ grid-template-columns:1fr; }
+    .landing-hero .split img:first-child{ display:none; }
+    .landing-hero .split img:last-child{ height:100%; object-position:center 32%; }
+  }
   .prop-block{ padding-block:clamp(4rem,9vh,7rem); }
   .prop-hero{ position:relative; height:78vh; min-height:520px; overflow:hidden; display:flex; align-items:flex-end; color:#fff; }
   .prop-hero img{ position:absolute; inset:0; width:100%; height:120%; object-fit:cover; z-index:-2; }
