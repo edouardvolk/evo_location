@@ -116,7 +116,7 @@ function init(stage) {
     frosted: new THREE.MeshStandardMaterial({ color: '#f1f4f3', transparent: true, opacity: .72, roughness: .4 }),
     mirror: std('#d3dde2', { metalness: .2, roughness: .06, emissive: '#9fb0b8', emissiveIntensity: .25 }),
     gold: std('#c69a32', { metalness: .75, roughness: .3 }), grey: std('#a6a9ac', { roughness: .95 }),
-    greyLight: std('#c3c5c7', { roughness: .95 }), dark: std('#5b5e62', { roughness: .95 }), velvet: std('#8eaec6', { roughness: .9 }),
+    greyLight: std('#c3c5c7', { roughness: .95 }), sofa: std('#9c9fa3', { roughness: .97 }), dark: std('#5b5e62', { roughness: .95 }), velvet: std('#8eaec6', { roughness: .9 }),
     mahogany: std('#6b2a17', { roughness: .4 }), brass: std('#b8923a', { metalness: .6, roughness: .35 }), radWhite: std('#f4f4f2', { roughness: .4 }),
   };
 
@@ -314,12 +314,27 @@ function init(stage) {
 
   // ---------- furniture ----------
   const F = T.furn;
+  // wall bed (hinged at the foot of the cabinet) + the sofa that takes its place when it is folded
+  const hinged = (parent, x, y, z) => {          // group turning around P(x, y, z); children use plan coordinates
+    const h = new THREE.Group(), inner = new THREE.Group(); h.position.copy(P(x, y, z)); inner.position.copy(h.position).negate();
+    h.add(inner); parent.add(h); return { h, inner };
+  };
+  const conv = {};
   item(gItems, 'drop', F, (g) => {
-    B(0.48, 0, 2.5, 2.48, 0.28, 3.86, M.white, g); B(0.5, 0.28, 2.52, 2.46, 0.5, 3.84, M.grey, g);
-    B(0.48, 0.28, 2.52, 0.7, 0.74, 3.84, M.dark, g);
-    [[2.6, 3.12], [3.24, 3.76]].forEach(([a, b]) => B(0.72, 0.5, a, 1.05, 0.62, b, M.greyLight, g));
+    const bed = hinged(g, 0.48, 0.1, 3.18), b = bed.inner; conv.bed = bed.h;
+    B(0.48, 0.1, 2.5, 2.38, 0.28, 3.86, M.gloss, b);                       // frame (its underside is the cabinet front once folded)
+    B(2.05, 0.075, 2.98, 2.08, 0.1, 3.38, M.chrome, b);                   // pull handle
+    B(0.5, 0.28, 2.52, 2.36, 0.48, 3.84, M.grey, b);                      // mattress & duvet
+    [[2.6, 3.12], [3.24, 3.76]].forEach(([a, c]) => B(0.6, 0.48, a, 0.92, 0.555, c, M.greyLight, b));
+    const legs = hinged(b, 2.29, 0.1, 3.18); conv.legs = legs.h;
+    [2.56, 3.74].forEach((z) => B(2.26, 0, z, 2.32, 0.1, z + 0.06, M.white2, legs.inner));
+    const sofa = hinged(g, 0.85, 0, 3.18), so = sofa.inner; conv.sofa = sofa.h;
+    B(0.5, 0, 2.58, 1.22, 0.18, 3.78, M.gloss, so);                       // white plinth
+    B(0.52, 0.18, 2.6, 1.2, 0.4, 3.76, M.sofa, so);                       // seat
+    const back = hinged(so, 0.74, 0.4, 3.18); conv.back = back.h;
+    B(0.56, 0.4, 2.6, 0.74, 0.86, 3.76, M.sofa, back.inner);              // backrest (folds onto the seat)
   }, 0.75);
-  item(gItems, 'drop', F + 0.35, (g) => {
+  conv.table = item(gItems, 'drop', F + 0.35, (g) => {
     B(1.5, 0.4, 4.05, 2.55, 0.45, 4.6, M.blackWood, g);
     [[1.53, 4.08], [2.47, 4.08], [1.53, 4.52], [2.47, 4.52]].forEach(([x, z]) => B(x, 0, z, x + 0.05, 0.4, z + 0.05, M.blackWood, g));
   }, 0.6);
@@ -353,6 +368,7 @@ function init(stage) {
     el.setAttribute('data-en', en); el.setAttribute('data-fr', fr); el.textContent = lang() === 'fr' ? fr : en;
     labelsEl.appendChild(el); return { el, pos };
   });
+  const bedLabel = labels[1], BED_POS = bedLabel.pos.clone(), SOFA_POS = P(0.9, 1.1, 3.18);
 
   // ---------- caption ----------
   const capEl = stage.querySelector('.plan3d__caption span');
@@ -361,7 +377,10 @@ function init(stage) {
     [T.kit, 'The kitchen', 'La cuisine'], [T.bath, 'The shower room', "La salle d'eau"],
     [T.store, 'Wall bed & storage', 'Lit escamotable et rangements'], [T.furn, 'Furnishing', "L'ameublement"],
     [T.labels, 'Welcome to Avenue Paul Doumer', 'Bienvenue avenue Paul Doumer'],
+    [Infinity, 'Sofa mode: the bed folds away', 'Mode canapé : le lit se replie'],
+    [Infinity, 'Bed mode: the bed folds down', 'Mode lit : le lit se déplie'],
   ];
+  const CAP_SOFA = STEPS.length - 2, CAP_BED = STEPS.length - 1;
   let capIdx = -1, capTimer = null;
   function setCaption(i) {
     if (i === capIdx) return; capIdx = i;
@@ -371,7 +390,7 @@ function init(stage) {
       const s = STEPS[i]; capEl.textContent = lang() === 'fr' ? s[2] : s[1]; capEl.classList.remove('out');
     }, 260);
   }
-  new MutationObserver(() => { if (capIdx >= 0 && !capEl.classList.contains('out')) { const s = STEPS[capIdx]; capEl.textContent = lang() === 'fr' ? s[2] : s[1]; } updateViewBtn(); })
+  new MutationObserver(() => { if (capIdx >= 0 && !capEl.classList.contains('out')) { const s = STEPS[capIdx]; capEl.textContent = lang() === 'fr' ? s[2] : s[1]; } updateViewBtn(); updateSofaBtn(); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
   // ---------- timeline playback ----------
@@ -394,13 +413,39 @@ function init(stage) {
     stage.classList.toggle('is-built', t >= T.labels);
   }
 
+  // ---------- sofa / bed mode : one parameter u, 0 = bed … MODE_LEN = sofa ----------
+  const MODE_LEN = 3.0, LEAN = 0.08;
+  let modeU = 0, modeTarget = 0, holdUntil = 0;
+  const clamp01 = (x) => Math.min(1, Math.max(0, x));
+  const inOut = (k) => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+  const TB = conv.table.userData.base.clone(), TD = new THREE.Vector3(1.775 - 2.025, 0, -(3.18 - 4.325));
+  function applyMode(u) {
+    conv.bed.rotation.z = inOut(clamp01(u / 1.3)) * Math.PI / 2;            // 1. the bed folds up into the cabinet
+    conv.legs.scale.y = Math.max(1 - clamp01(u / 0.3), 1e-3);
+    const rise = easeOut(clamp01((u - 0.85) / 0.75));                        // 2. the sofa comes out…
+    conv.sofa.visible = rise > 0.002; conv.sofa.scale.y = Math.max(rise, 1e-3);
+    conv.back.rotation.z = -Math.PI / 2 + (Math.PI / 2 + LEAN) * inOut(clamp01((u - 1.5) / 0.55)); // …and its back unfolds
+    const k = inOut(clamp01((u - 1.75) / 1.25)), tb = conv.table;            // 3. the coffee table moves in front of it
+    tb.position.x = TB.x + TD.x * k; tb.position.z = TB.z + TD.z * k; tb.rotation.y = k * Math.PI / 2;
+    if (!building) tb.position.y = TB.y + Math.sin(Math.PI * k) * 0.12;
+    const sofa = u > MODE_LEN / 2, en = sofa ? 'Sofa' : 'Wall bed', fr = sofa ? 'Canapé' : 'Lit escamotable';
+    if (bedLabel.el.getAttribute('data-en') !== en) { bedLabel.el.setAttribute('data-en', en); bedLabel.el.setAttribute('data-fr', fr); bedLabel.el.textContent = lang() === 'fr' ? fr : en; }
+    bedLabel.pos.lerpVectors(BED_POS, SOFA_POS, clamp01((u - 0.6) / 1.8));
+  }
+
   // ---------- camera framing ----------
   const center = P(0.9, 0.6, 2.5);
   let view = '3d', active = false, building = false, t0 = 0, tween = null, swing = null, swung = false;
   const sph3 = new THREE.Spherical();
-  const SWING_THETA = 0.1, SWING_PHI = 0.7;     // end of the build: from the back, windows in view
+  const SWING_THETA = 0.1, SWING_PHI = 0.7;
+  let SOFA_THETA = 3.05, SOFA_PHI = 0.6;
   function framing(kind) {
     const a = camera.aspect, tf = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    if (kind === 'sofa') {                     // the wall bed seen from the windows, along the ceiling beam
+      const c = P(1.25, 0.5, 3.35), d = a < 1 ? Math.max(2.9 / tf, 2.9 / (tf * a)) : Math.max(2.5 / tf, 3.6 / (tf * a));
+      const th = SOFA_THETA, ph = SOFA_PHI;
+      return { pos: c.clone().add(new THREE.Vector3(Math.sin(ph) * Math.sin(th), Math.cos(ph), Math.sin(ph) * Math.cos(th)).multiplyScalar(d)), tgt: c };
+    }
     if (kind === 'top') {
       const d = a < 1 ? Math.max(3.8 / tf, 3.8 / (tf * a)) : Math.max(3.3 / tf, 3.9 / (tf * a));
       return { pos: center.clone().add(new THREE.Vector3(0, d, 0.01)), tgt: center.clone() };
@@ -428,6 +473,24 @@ function init(stage) {
     const en = view === 'top' ? '3D view' : 'Top view', fr = view === 'top' ? 'Vue 3D' : 'Vue du dessus';
     viewBtn.setAttribute('data-en', en); viewBtn.setAttribute('data-fr', fr); viewBtn.textContent = lang() === 'fr' ? fr : en;
   }
+  const sofaBtn = stage.querySelector('[data-act="sofa"]');
+  function updateSofaBtn() {
+    if (!sofaBtn) return;
+    const s = modeTarget > 0, en = s ? 'Bed mode' : 'Sofa mode', fr = s ? 'Mode lit' : 'Mode canapé';
+    sofaBtn.setAttribute('data-en', en); sofaBtn.setAttribute('data-fr', fr); sofaBtn.textContent = lang() === 'fr' ? fr : en;
+    sofaBtn.setAttribute('aria-pressed', s ? 'true' : 'false');
+  }
+  let capHide = null;
+  sofaBtn?.addEventListener('click', (e) => {
+    e.stopPropagation(); modeTarget = modeTarget > 0 ? 0 : MODE_LEN; updateSofaBtn();
+    if (reduce) { modeU = modeTarget; applyMode(modeU); }
+    if (view === '3d') { swung = true; swing = null; goTo('sofa'); }
+    holdUntil = performance.now() + (reduce ? 0 : 1100 + MODE_LEN * 1000 + 1500);
+    if (!building) {
+      const ci = modeTarget > 0 ? CAP_SOFA : CAP_BED; setCaption(ci);
+      clearTimeout(capHide); capHide = setTimeout(() => { if (!building && capIdx === ci) setCaption(-1); }, 3800);
+    }
+  });
   function setActive(on) {
     active = on; controls.enabled = on; controls.autoRotate = !on && view === '3d' && !reduce;
     renderer.domElement.style.touchAction = on ? 'none' : 'pan-y';
@@ -441,9 +504,10 @@ function init(stage) {
     controls.autoRotate = !active && view === '3d' && !reduce; updateViewBtn(); goTo(view);
   });
   stage.querySelector('[data-act="replay"]')?.addEventListener('click', (e) => {
-    e.stopPropagation(); view = '3d'; updateViewBtn(); controls.autoRotate = !active && !reduce; goTo('3d'); startBuild();
+    e.stopPropagation(); view = '3d'; updateViewBtn(); controls.autoRotate = !active && !reduce; goTo('3d');
+    modeU = modeTarget = 0; holdUntil = 0; applyMode(0); updateSofaBtn(); startBuild();
   });
-  updateViewBtn();
+  updateViewBtn(); updateSofaBtn();
 
   function startBuild() { building = true; swung = reduce; swing = null; t0 = performance.now(); if (reduce) t0 -= T.end * 1000; applyTL(reduce ? T.end : 0); }
   function startSwing() {
@@ -459,7 +523,7 @@ function init(stage) {
   }
   new ResizeObserver(resize).observe(stage); resize();
   goTo('3d', true);
-  applyTL(-1);
+  applyTL(-1); applyMode(0);
 
   let visible = false, raf = 0, last = performance.now(), started = false;
   new IntersectionObserver((es) => {
@@ -477,6 +541,8 @@ function init(stage) {
       if (!swung && t >= T.swing && !active && view === '3d' && !tween) startSwing();
       if (t > T.labels + 3.4) building = false;
     }
+    if (modeU !== modeTarget) { modeU = modeTarget > modeU ? Math.min(modeTarget, modeU + dt) : Math.max(modeTarget, modeU - dt); applyMode(modeU); }
+    if (!active && view === '3d' && !reduce) controls.autoRotate = now > holdUntil;
     if (swing && (active || view !== '3d')) swing = null;
     if (swing) {
       const k = Math.min(1, (now - swing.s) / 2600), e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
@@ -515,6 +581,7 @@ function init(stage) {
   }
   if (/[?&]debug3d/.test(location.search)) {   // test hook: ?debug3d
     window.__plan3dSeek = (t, sw) => { building = false; applyTL(t); if (sw) { startSwing(); swing.s -= 2600; } };
+    window.__plan3dMode = (u, th, ph) => { if (th !== undefined) { SOFA_THETA = th; SOFA_PHI = ph; } modeU = modeTarget = u; applyMode(u); swing = null; goTo('sofa', true); holdUntil = Infinity; controls.autoRotate = false; };
   }
   window.__plan3dReady = true;
 }
