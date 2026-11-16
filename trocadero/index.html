@@ -9,6 +9,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css?v=4">
+<link rel="stylesheet" href="../assets/css/plan3d.css?v=1">
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
 </head>
 <body>
 
@@ -17,6 +21,7 @@
   <nav>
     <a class="navlink" href="#residence" data-en="The Residence" data-fr="La Résidence">The Residence</a>
     <a class="navlink" href="#gallery" data-en="Gallery" data-fr="Galerie">Gallery</a>
+    <a class="navlink" href="#plan3d" data-en="3D Plan" data-fr="Plan 3D">3D Plan</a>
     <a class="navlink" href="#neighbourhood" data-en="Neighbourhood" data-fr="Quartier">Neighbourhood</a>
     <a href="#contact" data-en="Enquire" data-fr="Contact">Enquire</a>
   </nav>
@@ -103,6 +108,31 @@
   </div>
 </section>
 
+<!-- 3D LAYOUT -->
+<section class="section" id="plan3d">
+  <div class="wrap">
+    <div class="gallery-head">
+      <div data-reveal>
+        <span class="eyebrow" data-en="The Layout" data-fr="Le Plan">The Layout</span>
+        <h2 data-en="Explore in 3D" data-fr="Explorez en 3D">Explore in 3D</h2>
+      </div>
+      <p class="lead" data-reveal data-reveal-delay="1" data-en="Watch the studio take shape, piece by piece — then click to explore it freely: turn it, zoom in, look into every corner." data-fr="Regardez le studio prendre forme, pièce après pièce — puis cliquez pour l'explorer librement : faites-le pivoter, zoomez, découvrez chaque recoin.">Watch the studio take shape, piece by piece — then click to explore it freely: turn it, zoom in, look into every corner.</p>
+    </div>
+    <div class="plan3d__stage" data-plan3d data-reveal="fade">
+      <div class="plan3d__labels"></div>
+      <div class="plan3d__caption"><span></span></div>
+      <div class="plan3d__controls">
+        <button type="button" data-act="view" data-en="Top view" data-fr="Vue du dessus">Top view</button>
+        <button type="button" data-act="replay" data-en="Replay" data-fr="Rejouer">Replay</button>
+      </div>
+      <button type="button" class="plan3d__explore" data-en="Click to explore" data-fr="Cliquez pour explorer">Click to explore</button>
+      <p class="plan3d__hint" data-en="Drag to turn · Scroll or pinch to zoom · Right-click or two fingers to move" data-fr="Glisser pour tourner · Molette ou pincer pour zoomer · Clic droit ou deux doigts pour déplacer">Drag to turn · Scroll or pinch to zoom · Right-click or two fingers to move</p>
+      <p class="plan3d__note" data-en="Illustrative layout — not to scale" data-fr="Plan indicatif — échelle non contractuelle">Illustrative layout — not to scale</p>
+      <p class="plan3d__fallback" data-en="The 3D view is not available on this device." data-fr="La vue 3D n'est pas disponible sur cet appareil.">The 3D view is not available on this device.</p>
+    </div>
+  </div>
+</section>
+
 <!-- NEIGHBOURHOOD -->
 <section id="neighbourhood">
   <div class="banner">
@@ -154,5 +184,6 @@
 </footer>
 
 <script src="../assets/js/main.js?v=4"></script>
+<script type="module" src="../assets/js/plan3d-trocadero.js?v=1"></script>
 </body>
 </html>
