@@ -1,0 +1,74 @@
+/* =========================================================
+   EVO — interactive 3D layout section
+   ========================================================= */
+.plan3d__stage{
+  position:relative; width:100%; aspect-ratio:16/10; max-height:84vh; overflow:hidden;
+  background:radial-gradient(120% 95% at 50% 32%, #fcfaf6 0%, #f1ebe1 58%, #e4dccd 100%);
+  border:1px solid var(--line); box-shadow:var(--shadow);
+}
+.plan3d__stage canvas{ display:block; width:100% !important; height:100% !important; }
+.plan3d__stage.is-active canvas{ cursor:grab; }
+.plan3d__stage.is-active canvas:active{ cursor:grabbing; }
+.plan3d__stage:not(.is-active) canvas{ cursor:pointer; }
+
+.plan3d__labels{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+.plan3d__label{
+  position:absolute; left:0; top:0; white-space:nowrap;
+  font-family:var(--sans); font-size:.6rem; font-weight:400; letter-spacing:.26em; text-transform:uppercase;
+  color:var(--ink); background:rgba(246,243,238,.9); border:1px solid var(--line); padding:.42rem .75rem;
+  opacity:0; transition:opacity .9s var(--ease);
+}
+.plan3d__stage.is-built .plan3d__label{ opacity:1; }
+
+.plan3d__caption{
+  position:absolute; left:clamp(1rem,3vw,2rem); top:clamp(1rem,3vw,1.8rem); max-width:55%;
+  font-family:var(--serif); font-size:clamp(1.15rem,2.2vw,1.8rem); line-height:1.15; color:var(--ink); pointer-events:none;
+}
+.plan3d__caption::before{ content:""; display:block; width:40px; height:1px; background:var(--gold); margin-bottom:.7rem; }
+.plan3d__caption span{ display:inline-block; transition:opacity .45s var(--ease), transform .45s var(--ease); }
+.plan3d__caption span.out{ opacity:0; transform:translateY(8px); }
+
+.plan3d__controls{ position:absolute; right:clamp(1rem,3vw,1.8rem); top:clamp(1rem,3vw,1.8rem); display:flex; gap:.5rem; }
+.plan3d__controls button{
+  background:rgba(246,243,238,.92); border:1px solid var(--line); color:var(--ink); cursor:pointer;
+  font-family:var(--sans); font-size:.6rem; font-weight:400; letter-spacing:.22em; text-transform:uppercase;
+  padding:.6rem .9rem; transition:background .4s var(--ease), color .4s var(--ease);
+}
+.plan3d__controls button:hover{ background:var(--ink); color:#fff; }
+
+.plan3d__explore{
+  position:absolute; left:50%; bottom:clamp(1rem,3vw,1.8rem); transform:translateX(-50%);
+  background:var(--ink); color:#fff; border:0; cursor:pointer;
+  font-family:var(--sans); font-size:.68rem; font-weight:400; letter-spacing:.28em; text-transform:uppercase;
+  padding:.95rem 1.9rem; transition:opacity .5s var(--ease), transform .5s var(--ease), background .4s var(--ease);
+}
+.plan3d__explore:hover{ background:var(--gold); }
+.plan3d__explore{ white-space:nowrap; }
+.plan3d__stage.is-active .plan3d__explore{ opacity:0; pointer-events:none; transform:translate(-50%,10px); }
+
+.plan3d__hint{
+  position:absolute; left:50%; bottom:clamp(1rem,3vw,1.8rem); transform:translateX(-50%);
+  font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-soft); white-space:nowrap;
+  background:rgba(246,243,238,.92); border:1px solid var(--line); padding:.55rem .9rem;
+  opacity:0; transition:opacity .5s var(--ease); pointer-events:none;
+}
+.plan3d__stage.is-active .plan3d__hint{ opacity:1; }
+
+.plan3d__note{
+  position:absolute; right:clamp(1rem,3vw,2rem); bottom:clamp(.7rem,2vw,1.1rem);
+  font-size:.55rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-soft); opacity:.7; pointer-events:none;
+}
+.plan3d__fallback{ display:none; position:absolute; inset:0; align-items:center; justify-content:center; text-align:center; padding:2rem; color:var(--ink-soft); }
+.plan3d__stage.is-error .plan3d__fallback{ display:flex; }
+.plan3d__stage.is-error > :not(.plan3d__fallback){ display:none; }
+
+@media(max-width:760px){
+  .plan3d__stage{ aspect-ratio:4/5; max-height:none; }
+  .plan3d__controls{ flex-direction:column; align-items:flex-end; }
+  .plan3d__hint{ white-space:normal; width:86%; text-align:center; }
+  .plan3d__note{ display:none; }
+  .plan3d__label{ font-size:.5rem; letter-spacing:.16em; padding:.3rem .5rem; }
+  .plan3d__label.is-minor{ display:none; }
+  .plan3d__explore{ padding:.85rem 1.4rem; font-size:.62rem; letter-spacing:.22em; }
+  .plan3d__caption{ max-width:52%; }
+}
