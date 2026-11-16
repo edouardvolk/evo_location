@@ -212,7 +212,6 @@ function init(stage) {
   wallZ(0, 2.1, 2.3, 2.4, 0, H, [{ a0: 0.4, a1: 1.7, b0: 2.12, b1: 2.55 }], gInt);
   wallX(2.4, LX, 2.0, 2.1, 0, H, [{ a0: 2.45, a1: 3.1, b0: 0, b1: 2.55 }], gInt);
   B(2.45, 2.05, 2.0, 3.1, 2.12, 2.1, M.wall, gInt);
-  B(2.05, H - 0.25, 2.1, 2.3, H, D, M.wall, gInt);
   {
     const tm = (w, h) => tiled(texWhiteTile, w, h, 0.4, { roughness: .25 });
     B(2.4, 0, 0, 2.41, 2.12, 2.0, tm(2.0, 2.12), gInt);
@@ -438,10 +437,10 @@ function init(stage) {
   let view = '3d', active = false, building = false, t0 = 0, tween = null, swing = null, swung = false;
   const sph3 = new THREE.Spherical();
   const SWING_THETA = 0.1, SWING_PHI = 0.7;
-  let SOFA_THETA = 3.05, SOFA_PHI = 0.6;
+  let SOFA_THETA = 2.0, SOFA_PHI = 0.5;
   function framing(kind) {
     const a = camera.aspect, tf = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    if (kind === 'sofa') {                     // the wall bed seen from the windows, along the ceiling beam
+    if (kind === 'sofa') {                     // facing the wall bed, from the kitchen side
       const c = P(1.25, 0.5, 3.35), d = a < 1 ? Math.max(2.9 / tf, 2.9 / (tf * a)) : Math.max(2.5 / tf, 3.6 / (tf * a));
       const th = SOFA_THETA, ph = SOFA_PHI;
       return { pos: c.clone().add(new THREE.Vector3(Math.sin(ph) * Math.sin(th), Math.cos(ph), Math.sin(ph) * Math.cos(th)).multiplyScalar(d)), tgt: c };
